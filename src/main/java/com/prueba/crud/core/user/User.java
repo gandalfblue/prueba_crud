@@ -4,6 +4,7 @@ import com.prueba.crud.core.shared.SelfValidating;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.format.annotation.NumberFormat;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -24,7 +25,8 @@ public class User extends SelfValidating<User> implements Serializable{
 	private String email;
 
 	@Indexed(unique = true)
-	private String dni;
+	@NumberFormat
+	private Integer dni;
 
 	@NotBlank
 	private String password;

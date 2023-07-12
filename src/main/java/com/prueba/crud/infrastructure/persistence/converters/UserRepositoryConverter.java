@@ -3,19 +3,21 @@ package com.prueba.crud.infrastructure.persistence.converters;
 import com.prueba.crud.core.user.User;
 import com.prueba.crud.infrastructure.persistence.entities.UserEntity;
 import com.prueba.crud.infrastructure.shared.RepositoryConverter;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UserRepositoryConverter implements RepositoryConverter<UserEntity, User> {
 
 	@Override
 	public UserEntity mapToDocument(final User persistenceObject) {
 		return new UserEntity(persistenceObject.getId(), persistenceObject.getNameComplete(),
-				persistenceObject.getEmail(),persistenceObject.getPassword(),
-				persistenceObject.getRol(), persistenceObject.getDni());
+				persistenceObject.getEmail(),persistenceObject.getDni(),
+				persistenceObject.getRol(), persistenceObject.getPassword());
 	}
 
 	@Override
 	public User mapToEntity(final UserEntity entityObject) {
 		return new User(entityObject.getId(), entityObject.getNameComplete(),
-				entityObject.getEmail(), entityObject.getPassword(), entityObject.getRol(), entityObject.getDni());
+				entityObject.getEmail(), entityObject.getDni(), entityObject.getRol(), entityObject.getPassword());
 	}
 }
