@@ -5,7 +5,6 @@ import org.springframework.boot.web.reactive.error.DefaultErrorAttributes;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -21,7 +20,7 @@ public class GlobalErrorAttributes extends DefaultErrorAttributes {
         Map<String, Object> errorAttributes = new LinkedHashMap<String, Object>(); //this.getErrorAttributes(request, options.isIncluded(ErrorAttributeOptions.Include.STACK_TRACE));
         Throwable error = getError(request);
         MergedAnnotation<ResponseStatus> responseStatusAnnotation = MergedAnnotations.from(error.getClass(), MergedAnnotations.SearchStrategy.TYPE_HIERARCHY).get(ResponseStatus.class);
-        HttpStatusCode errorStatus = this.determineHttpStatus(error, responseStatusAnnotation);
+        HttpStatus errorStatus = this.determineHttpStatus(error, responseStatusAnnotation);
         errorAttributes.put("message", error.getMessage());
         errorAttributes.put("path", request.path());
         errorAttributes.put("status", errorStatus.value());
@@ -29,9 +28,9 @@ public class GlobalErrorAttributes extends DefaultErrorAttributes {
         return errorAttributes;
     }
 
-    private HttpStatusCode determineHttpStatus(Throwable error, MergedAnnotation<ResponseStatus> responseStatusAnnotation) {
+    private HttpStatus determineHttpStatus(Throwable error, MergedAnnotation<ResponseStatus> responseStatusAnnotation) {
         return error instanceof ResponseStatusException
-                ? ((ResponseStatusException) error).getStatusCode()
+                ? ((ResponseStatusException) error).getStatus()
                 : (HttpStatus) responseStatusAnnotation.getValue("code", HttpStatus.class).orElse(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

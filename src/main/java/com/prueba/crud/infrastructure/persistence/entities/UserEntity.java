@@ -1,14 +1,14 @@
 package com.prueba.crud.infrastructure.persistence.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.NumberFormat;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
@@ -16,10 +16,10 @@ import java.io.Serializable;
  * Clase que representa a la colección Usuario creada en la base de datos.
  * @author 100 de cilantro
  */
-@Document(collection = "usuarios")
-@Data
+@Document(collection = "users")
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 public class UserEntity implements Serializable{
 
     private static final long serialVersionUID = -595183205195778907L;
@@ -35,6 +35,7 @@ public class UserEntity implements Serializable{
 
     @Indexed(unique = true)
     @NumberFormat
+    @NotNull
     private Integer dni;
 
     @NotBlank
