@@ -1,5 +1,7 @@
 package com.prueba.crud.core.shared;
 
+import org.springframework.stereotype.Component;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
