@@ -3,9 +3,7 @@ package com.prueba.crud.infrastructure.persistence.converters;
 import com.prueba.crud.core.user.User;
 import com.prueba.crud.infrastructure.persistence.entities.UserEntity;
 import com.prueba.crud.infrastructure.shared.RepositoryConverter;
-import org.springframework.stereotype.Component;
 
-@Component
 public class UserRepositoryConverter implements RepositoryConverter<UserEntity, User> {
 
 	@Override
