@@ -5,11 +5,14 @@ import com.prueba.crud.core.user.ports.UserRepositoryService;
 import com.prueba.crud.infrastructure.persistence.converters.UserRepositoryConverter;
 import com.prueba.crud.infrastructure.persistence.repositories.UserRepository;
 import com.prueba.crud.infrastructure.shared.exceptions.BadRequestException;
+import com.prueba.crud.infrastructure.shared.exceptions.NotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Optional;
 
 @AllArgsConstructor
 public class UserServiceImpl implements UserRepositoryService {
@@ -17,7 +20,6 @@ public class UserServiceImpl implements UserRepositoryService {
 	private final UserRepository userRepository;
 
 	private final UserRepositoryConverter userRepositoryConverter;
-
 
 	@Override
 	public Flux<User> getAllUsers() {
@@ -36,7 +38,7 @@ public class UserServiceImpl implements UserRepositoryService {
 										.map(userRepositoryConverter::mapToEntity);
 
 							}
-							return Mono.error(new BadRequestException("Ya existe un usuario con ese DNI"));
+							return Mono.error(new BadRequestException("400 Ya existe un usuario con ese DNI"));
 				});
 
 	}
@@ -44,13 +46,11 @@ public class UserServiceImpl implements UserRepositoryService {
 	@Override
 	public Mono<Void> deleteUser(User user) {
 		return doesUserDniExists(user.getDni())
-				.flatMap(userNoExist ->{
-					if (!userNoExist) {
+				.flatMap(userExist ->{
+					if (userExist) {
 						return userRepository
-									.delete(userRepositoryConverter.mapToDocument(user))
-									.switchIfEmpty(Mono.defer(() ->
-											userRepository.delete(userRepositoryConverter.mapToDocument(user))));}
-					return Mono.error(new BadRequestException("El usuario no existe"));
+									.deleteById(userRepositoryConverter.mapToDocument(user).getId());}
+					return Mono.error(new NotFoundException("404 User not found"));
 				});
 	}
 
@@ -63,14 +63,27 @@ public class UserServiceImpl implements UserRepositoryService {
 					if(error.equals(HttpStatus.NOT_FOUND)){
 						return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND));
 					}
-					return Mono.error(new BadRequestException("Su petición no se pudo completar"));
+					return Mono.error(new BadRequestException("400 bad Request"));
 				});
 	}
 
 	@Override
 	public Mono<Boolean> doesUserDniExists(Integer dni) {
-		return userRepository
-				.findByDni(dni)
-				.hasElement();
+		return findByDni(dni)
+				.onErrorResume(error -> {
+					if(error.equals(HttpStatus.NOT_FOUND)){
+						return Mono.error(new NotFoundException("404 User not found"));
+					}
+					return Mono.error(new BadRequestException("400 bad Request"));
+				});
+	}
+
+	@Override
+	public Mono<Boolean> findByDni(Integer dni) {
+		return getAllUsers()
+				.filter(user -> dni.equals(user.getDni()))
+				.map(filteredUser -> Optional.ofNullable(filteredUser)
+						.map(optionalUser -> Boolean.TRUE).orElse(null))
+				.hasElements();
 	}
 }

@@ -11,5 +11,9 @@ public class NotFoundException extends UserException{
     public NotFoundException(String message) {
         super(HttpStatus.NOT_FOUND.value(), message);
     }
+
+    public int getCode() {
+        return super.getCode();
+    }
 }
 

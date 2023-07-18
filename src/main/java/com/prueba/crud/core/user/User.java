@@ -3,6 +3,7 @@ package com.prueba.crud.core.user;
 import com.prueba.crud.core.shared.SelfValidating;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -12,9 +13,10 @@ import java.io.Serializable;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class User extends SelfValidating<User> implements Serializable{
 
-	private Long id;
+	private String id;
 
 	@NotEmpty(message = "Campo nombre no puede ser vacio")
 	@NotBlank(message = "Campo nombre no puede ser null")

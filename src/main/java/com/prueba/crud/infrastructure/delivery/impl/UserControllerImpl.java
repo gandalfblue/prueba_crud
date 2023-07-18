@@ -42,7 +42,7 @@ public class UserControllerImpl implements UserController {
 
 	@Override
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping("/getAllUsers")
 	@Operation(summary = "Get a all users")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Founds the users",
@@ -52,14 +52,26 @@ public class UserControllerImpl implements UserController {
 					content = @Content),
 			@ApiResponse(responseCode = "404", description = "Users not founds",
 					content = @Content) })
-	public UserResponse<Flux<UserRest>> getAllUsers() throws UserException {
-		return new UserResponse<>(CommonConstants.SUCCESS, String.valueOf(HttpStatus.OK), CommonConstants.OK,
-				getAllUsersUseCaseImpl.execute());
+	public Flux<UserResponse<UserRest>> getAllUsers() throws UserException {
+		return getAllUsersUseCaseImpl.execute().
+				flatMap(userRest -> Flux.just(new UserResponse<>(CommonConstants.SUCCESS,
+						String.valueOf(HttpStatus.OK), CommonConstants.OK,userRest)))
+				.onErrorResume(error -> {
+					if(error.equals(HttpStatus.NOT_FOUND)){
+						return Mono.just(new UserResponse<>(CommonConstants.FAIL,
+								String.valueOf(HttpStatus.NOT_FOUND), "User don't exist"));
+					} else if (error.equals(HttpStatus.BAD_REQUEST)){
+						return Mono.just(new UserResponse<>(CommonConstants.FAIL,
+								String.valueOf(HttpStatus.BAD_REQUEST), "Error, invalid request"));
+					}
+					return Mono.just(new UserResponse<>(CommonConstants.FAIL,
+							String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR), "Server error, could not connect"));
+				});
 	}
 
 	@Override
 	@ResponseStatus(HttpStatus.OK)
-	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping("/saveUser")
 	@Operation(summary = "Create a user")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Created a user",
@@ -69,15 +81,27 @@ public class UserControllerImpl implements UserController {
 					content = @Content),
 			@ApiResponse(responseCode = "404", description = "User not found",
 					content = @Content) })
-	public UserResponse<Mono<UserRest>> createUser(@Valid @RequestBody UserRest user) throws UserException {
-		return new UserResponse<>(CommonConstants.SUCCESS, String.valueOf(HttpStatus.OK), CommonConstants.OK,
-				createUserUseCaseImpl
-						.execute(userRestConverter.mapToEntity(user)));
+	public Mono<UserResponse<UserRest>> createUser(@Valid @RequestBody UserRest user) throws UserException {
+		return createUserUseCaseImpl
+				.execute(userRestConverter.mapToEntity(user))
+				.flatMap(userRest -> Mono.just(new UserResponse<>(CommonConstants.SUCCESS,
+						String.valueOf(HttpStatus.OK), CommonConstants.OK,userRest)))
+				.onErrorResume(error -> {
+					if(error.equals(HttpStatus.NOT_FOUND)){
+						return Mono.just(new UserResponse<>(CommonConstants.FAIL,
+								String.valueOf(HttpStatus.NOT_FOUND), "User don't exist"));
+					} else if (error.equals(HttpStatus.BAD_REQUEST)){
+						return Mono.just(new UserResponse<>(CommonConstants.FAIL,
+								String.valueOf(HttpStatus.BAD_REQUEST), "Error, invalid request"));
+					}
+					return Mono.just(new UserResponse<>(CommonConstants.FAIL,
+							String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR), "Server error, could not connect"));
+				});
 	}
 
 	@Override
 	@ResponseStatus(HttpStatus.OK)
-	@DeleteMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping("/deleteUser")
 	@Operation(summary = "Delete user")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Found the user",
@@ -87,14 +111,27 @@ public class UserControllerImpl implements UserController {
 					content = @Content),
 			@ApiResponse(responseCode = "404", description = "User not found",
 					content = @Content) })
-	public UserResponse<Mono<Boolean>> deleteUser(@Valid @RequestBody UserRest userRest) throws UserException {
-		return new UserResponse<>(CommonConstants.SUCCESS, String.valueOf(HttpStatus.OK), CommonConstants.OK,
-				deleteUserUseCaseImpl.execute(userRestConverter.mapToEntity(userRest)));
+	public Mono<UserResponse<Void>> deleteUser(@Valid @RequestBody UserRest user) throws UserException {
+		return deleteUserUseCaseImpl
+				.execute(userRestConverter.mapToEntity(user))
+				.flatMap(userRest ->Mono.just(new UserResponse<>(CommonConstants.SUCCESS,
+						String.valueOf(HttpStatus.OK), CommonConstants.OK,userRest)))
+				.onErrorResume(error -> {
+					if(error.getMessage().contains("404")){
+						return Mono.just(new UserResponse<>(CommonConstants.FAIL,
+								String.valueOf(HttpStatus.NOT_FOUND), "User don't exist"));
+					} else if (error.getMessage().contains("400")) {
+						return Mono.just(new UserResponse<>(CommonConstants.FAIL,
+								String.valueOf(HttpStatus.BAD_REQUEST), "Error, invalid request"));
+					}
+					return Mono.just(new UserResponse<>(CommonConstants.FAIL,
+							String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR), "Server error, could not connect"));
+				});
 	}
 
 	@Override
 	@ResponseStatus(HttpStatus.OK)
-	@PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping("/updateUser")
 	@Operation(summary = "Update user")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Found the user",
@@ -104,9 +141,20 @@ public class UserControllerImpl implements UserController {
 					content = @Content),
 			@ApiResponse(responseCode = "404", description = "User not found",
 					content = @Content) })
-	public UserResponse<Mono<UserRest>> updateUser(@Valid @RequestBody UserRest user) throws UserException {
-		return new UserResponse<>(CommonConstants.SUCCESS, String.valueOf(HttpStatus.OK), CommonConstants.OK,
-				updateUserUseCaseImpl
-						.execute(userRestConverter.mapToEntity(user)));
+	public Mono<UserResponse<UserRest>> updateUser(@Valid @RequestBody UserRest user) throws UserException {
+		return updateUserUseCaseImpl.execute(userRestConverter.mapToEntity(user))
+				.flatMap(userRest -> Mono.just(new UserResponse<>(CommonConstants.SUCCESS,
+						String.valueOf(HttpStatus.OK), CommonConstants.OK,userRest)))
+				.onErrorResume(error -> {
+					if(error.equals(HttpStatus.NOT_FOUND)){
+						return Mono.just(new UserResponse<>(CommonConstants.FAIL,
+								String.valueOf(HttpStatus.NOT_FOUND), "User don't exist"));
+					} else if (error.equals(HttpStatus.BAD_REQUEST)){
+						return Mono.just(new UserResponse<>(CommonConstants.FAIL,
+								String.valueOf(HttpStatus.BAD_REQUEST), "Error, invalid request"));
+					}
+					return Mono.just(new UserResponse<>(CommonConstants.FAIL,
+							String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR), "Server error, could not connect"));
+				});
 	}
 }

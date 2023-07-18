@@ -6,5 +6,5 @@ import reactor.core.publisher.Mono;
 
 @FunctionalInterface
 public interface DeleteUserUseCase {
-	public Mono<Boolean> execute(User user) throws UserException;
+	public Mono<Void> execute(User user) throws UserException;
 }
