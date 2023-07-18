@@ -5,6 +5,7 @@ import com.prueba.crud.core.user.ports.UserRepositoryService;
 import com.prueba.crud.infrastructure.delivery.converters.UserRestConverter;
 import com.prueba.crud.infrastructure.delivery.rest.UserRest;
 import com.prueba.crud.infrastructure.shared.exceptions.BadRequestException;
+import com.prueba.crud.infrastructure.shared.exceptions.NotFoundException;
 import com.prueba.crud.infrastructure.shared.exceptions.UserException;
 import lombok.AllArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -17,10 +18,9 @@ public class UpdateUserUseCaseImpl implements UpdateUserUseCase {
 
 	@Override
 	public Mono<UserRest> execute(User user) throws UserException {
-
 		return userRepositoryService.doesUserDniExists(user.getDni()).
 				flatMap(userExist ->{
-							if (!userExist) Mono.error(new BadRequestException("No existe el usuario en la DB"));
+							if (!userExist) Mono.error(new NotFoundException("404 No existe el usuario en la DB"));
 							return userRepositoryService
 									.updateUser(user)
 									.map(userRestConverter::mapToRest);

@@ -25,7 +25,7 @@ public class UserEntity implements Serializable{
     private static final long serialVersionUID = -595183205195778907L;
 
     @Id
-    private Long id;
+    private String id;
 
     @NotBlank
     private String nameComplete;

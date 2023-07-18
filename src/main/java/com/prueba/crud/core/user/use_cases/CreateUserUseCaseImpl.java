@@ -17,10 +17,9 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
 
 	@Override
 	public Mono<UserRest> execute(User user) throws UserException {
-
 		return userRepositoryService.doesUserDniExists(user.getDni()).
 				flatMap(userExist ->{
-							if (userExist) Mono.error(new BadRequestException("Ya existe creado este usuario"));
+							if (userExist) Mono.error(new BadRequestException("400 Ya existe creado este usuario"));
 							return userRepositoryService
 									.saveUser(user)
 									.map(userRestConverter::mapToRest);

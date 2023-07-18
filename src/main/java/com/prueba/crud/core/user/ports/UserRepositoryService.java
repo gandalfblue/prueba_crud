@@ -15,4 +15,6 @@ public interface UserRepositoryService {
 	public Mono<User> updateUser(User user) ;
 
 	public Mono<Boolean> doesUserDniExists(Integer dni);
+
+	Mono<Boolean> findByDni(Integer dni);
 }

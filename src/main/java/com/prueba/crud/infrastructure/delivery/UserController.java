@@ -9,8 +9,8 @@ import reactor.core.publisher.Mono;
 
 public interface UserController {
 
-	UserResponse<Flux<UserRest>> getAllUsers() throws UserException;
-	UserResponse<Mono<UserRest>> createUser(UserRest user) throws UserException;
-	UserResponse<Mono<Boolean>> deleteUser(UserRest userRest) throws UserException;
-	UserResponse<Mono<UserRest>> updateUser(UserRest user) throws UserException;
+	Flux<UserResponse<UserRest>> getAllUsers() throws UserException;
+	Mono<UserResponse<UserRest>> createUser(UserRest user) throws UserException;
+	Mono<UserResponse<Void>> deleteUser(UserRest userRest) throws UserException;
+	Mono<UserResponse<UserRest>> updateUser(UserRest user) throws UserException;
 }
